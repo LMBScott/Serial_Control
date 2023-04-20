@@ -1,47 +1,51 @@
+#include <ArduinoHardware.h>
+#include <ArduinoTcpHardware.h>
+#include <ros.h>
+
 #include "include/LimitServo.hpp"
 
 const int BAUD_RATE = 9600;
 const int MOTOR_STATE_STRING_LENGTH = 12;
 
-const int servoUpDownPin = 7;
-const int servoLeftRightPin = 8;
+const int servoDistalPanPin = 7;
+const int servoDistalPanPin = 8;
 const int servoProximalPanPin = 9;
 const int servoProximalTiltPin = 10;
 
-const int servoUpDownEqAngle = 88;
-const int servoLeftRightEqAngle = 84;
+const int servoDistalTiltEqAngle = 88;
+const int servoDistalPanEqAngle = 84;
 const int servoProximalPanEqAngle = 95;
 const int servoProximalTiltEqAngle = 90;
 
-const int servoUpDownMinAngle = 80;
-const int servoLeftRightMinAngle = 78;
+const int servoDistalTiltMinAngle = 80;
+const int servoDistalPanMinAngle = 78;
 const int servoProximalPanMinAngle = 89;
 const int servoProximalTiltMinAngle = 84;
 
-const int servoUpDownMaxAngle = 94;
-const int servoLeftRightMaxAngle = 100;
+const int servoDistalTiltMaxAngle = 94;
+const int servoDistalPanMaxAngle = 100;
 const int servoProximalPanMaxAngle = 100;
 const int servoProximalTiltMaxAngle = 95;
 
-int servoUpDownPos = servoUpDownEqAngle;
-int servoLeftRightPos = servoLeftRightEqAngle;
+int servoUpDownPos = servoDistalTiltEqAngle;
+int servoLeftRightPos = servoDistalPanEqAngle;
 int servoProximalPanPos = servoProximalPanEqAngle;
 int servoProximalTiltPos = servoProximalTiltEqAngle;
 
 char* motorStateString;
 
-LimitServo servoUpDown(
-    servoUpDownPin,
-    servoUpDownEqAngle,
-    servoUpDownMinAngle,
-    servoUpDownMaxAngle
+LimitServo servoDistalTilt(
+    servoDistalPanPin,
+    servoDistalTiltEqAngle,
+    servoDistalTiltMinAngle,
+    servoDistalTiltMaxAngle
 );
 
-LimitServo servoLeftRight(
-    servoLeftRightPin,
-    servoLeftRightEqAngle,
-    servoLeftRightMinAngle,
-    servoLeftRightMaxAngle
+LimitServo servoDistalPan(
+    servoDistalPanPin,
+    servoDistalPanEqAngle,
+    servoDistalPanMinAngle,
+    servoDistalPanMaxAngle
 );
 
 LimitServo servoProximalPan(
@@ -62,21 +66,21 @@ void setup()
 {
     Serial.begin(BAUD_RATE);
 
-    servoUpDown.Attach();
-    servoLeftRight.Attach();
+    servoDistalTilt.Attach();
+    servoDistalPan.Attach();
     servoProximalPan.Attach();
     servoProximalTilt.Attach();
 
-    servoUpDown.MoveToEquilibrium();
-    servoLeftRight.MoveToEquilibrium();
+    servoDistalTilt.MoveToEquilibrium();
+    servoDistalPan.MoveToEquilibrium();
     servoProximalPan.MoveToEquilibrium();
     servoProximalTilt.MoveToEquilibrium();
 
     bool hasSentStartupString = false;
     motorStateString = (char *)malloc(MOTOR_STATE_STRING_LENGTH * sizeof(char));
 
-    int servoUpDownEqAngle = servoUpDown.GetEquilibriumAngle();
-    int servoLeftRightEqAngle = servoLeftRight.GetEquilibriumAngle();
+    int servoUpDownEqAngle = servoDistalTilt.GetEquilibriumAngle();
+    int servoLeftRightEqAngle = servoDistalPan.GetEquilibriumAngle();
     int servoProximalPanEqAngle = servoProximalPan.GetEquilibriumAngle();
     int servoProximalTiltEqAngle = servoProximalTilt.GetEquilibriumAngle();
 
@@ -85,7 +89,7 @@ void setup()
     while (!Serial)
     {
     }
-    
+
     while (!hasSentStartupString)
     {
         Serial.print(motorStateString);
@@ -111,11 +115,11 @@ void loop() {
         {
             // Serial.print("Moving motor 1 to: ");
             // Serial.println(state.substring(0,3));
-            servoUpDown.Move(commandString.substring(0,3).toInt());
+            servoDistalTilt.Move(commandString.substring(0,3).toInt());
 
             // Serial.print("Moving motor 2 to: ");
             // Serial.println(state.substring(3,6));
-            servoLeftRight.Move(commandString.substring(3,6).toInt());
+            servoDistalPan.Move(commandString.substring(3,6).toInt());
 
             // Serial.print("Moving motor 3 to: ");
             // Serial.println(state.substring(6,9));
@@ -125,7 +129,7 @@ void loop() {
             // Serial.println(state.substring(9,12));
             servoProximalTilt.Move(commandString.substring(9,12).toInt());
 
-            sprintf(motorStateString, "%03d%03d%03d%03d\n", servoUpDown.GetAngle(), servoLeftRight.GetAngle(), servoProximalPan.GetAngle(), servoProximalTilt.GetAngle());
+            sprintf(motorStateString, "%03d%03d%03d%03d\n", servoDistalTilt.GetAngle(), servoDistalPan.GetAngle(), servoProximalPan.GetAngle(), servoProximalTilt.GetAngle());
             Serial.print(motorStateString);
         }
     }
